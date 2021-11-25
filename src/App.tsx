@@ -8,11 +8,11 @@ const Square = ({value, onClick}: { value: string, onClick: Function }) => {
     )
 }
 
-const Board = ({state, onClick}: { state: string[], onClick: Function }) => {
+const Board = ({squares, onClick}: { squares: string[], onClick: Function }) => {
 
     const renderSquare = (i: number) => {
         return <Square
-            value={state[i]}
+            value={squares[i]}
             onClick={() => {
                 onClick(i)
             }}
@@ -41,21 +41,22 @@ const Board = ({state, onClick}: { state: string[], onClick: Function }) => {
 }
 
 export const Game = () => {
-    const [history, setHistory] = useState<string[][]>([Array(9).fill(null)])
-    const [xIsNext, setXIsNext] = useState(true)
+    let initialState = ["", "", "", "", "", "", "", "", ""];
+    const [history, setHistory] = useState([{squares: initialState}])
     const [stepNumber, setStepNumber] = useState(0)
+    const [xIsNext, setXIsNext] = useState(true)
 
     const handleClick = (i: number) => {
         const _history = history.slice(0, stepNumber + 1)
         const current = _history[_history.length - 1]
-        const squares = current.slice()
+        const squares = current.squares.slice()
         if (calculateWinner(squares) || squares[i]) {
             return;
         }
         squares[i] = xIsNext ? 'X' : 'O'
-        setHistory(_history.concat([squares]))
-        setXIsNext(!xIsNext)
+        setHistory(_history.concat([{squares: squares}]))
         setStepNumber(_history.length)
+        setXIsNext(!xIsNext)
     }
 
     const jumpTo = (step: number) => {
@@ -65,7 +66,19 @@ export const Game = () => {
 
     const _history = history
     const current = _history[stepNumber]
-    const winner = calculateWinner(current)
+    const winner = calculateWinner(current.squares)
+
+    const moves = _history.map((step, move) => {
+        const desc = move ? 'Go to move #' + move : 'Go to game start';
+        return (
+            <li key={move}>
+                <button onClick={() => {
+                    jumpTo(move)
+                }}>{desc}</button>
+            </li>
+        )
+    })
+
     let status: string;
     if (winner) {
         status = 'Winner: ' + winner
@@ -73,24 +86,11 @@ export const Game = () => {
         status = 'Next player: ' + (xIsNext ? 'X' : 'O')
     }
 
-    const moves = _history.map((step, move) => {
-        const desc = move ? 'Go to move #' + move : 'Go to game start';
-        return (
-            <li key={move}>
-                <button
-                    onClick={() => {
-                        jumpTo(move)
-                    }}
-                >{desc}</button>
-            </li>
-        )
-    })
-
     return (
         <div className="game">
             <div className="game-board">
                 <Board
-                    state={current}
+                    squares={current.squares}
                     onClick={(i: number) => {
                         handleClick(i)
                     }}/>
