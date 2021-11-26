@@ -2,7 +2,9 @@ import {useState} from "react";
 
 const Square = ({value, onClick}: { value: string, onClick: Function }) => {
     return (
-        <button className="square" onClick={onClick()}>
+        <button className="square" onClick={() => {
+            onClick()
+        }}>
             {value}
         </button>
     )
@@ -41,8 +43,7 @@ const Board = ({squares, onClick}: { squares: string[], onClick: Function }) => 
 }
 
 export const Game = () => {
-    let initialState = ["", "", "", "", "", "", "", "", ""];
-    const [history, setHistory] = useState([{squares: initialState}])
+    const [history, setHistory] = useState([{squares: Array<string>(9).fill("")}])
     const [stepNumber, setStepNumber] = useState(0)
     const [xIsNext, setXIsNext] = useState(true)
 
